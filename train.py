@@ -36,10 +36,22 @@ def train_model(epochs=2, batch_size=4):
     for epoch in range(epochs):
         model.train()
         running_loss = 0.0
-
+        count = 0
         for images, targets in train_loader:
-            images = [img.to(device) for img in images]
-            targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+            # Filter out samples with no boxes
+            print(count)
+            count += 1
+            images_, targets_ = [], []
+            for img, tgt in zip(images, targets):
+                if tgt["boxes"].shape[0] > 0:  # only keep non-empty targets
+                    images_.append(img)
+                    targets_.append(tgt)
+
+            if len(images_) == 0:
+                continue  # skip if none have boxes
+
+            images = [img.to(device) for img in images_]
+            targets = [{k: v.to(device) for k, v in t.items()} for t in targets_]
 
             loss_dict = model(images, targets)
             losses = sum(loss for loss in loss_dict.values())
@@ -48,6 +60,7 @@ def train_model(epochs=2, batch_size=4):
             losses.backward()
             optimizer.step()
             running_loss += losses.item()
+
 
         print(f"Epoch {epoch+1}/{epochs} - Loss: {running_loss:.4f}")
 
