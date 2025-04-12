@@ -1,0 +1,5 @@
+coco-eval 
+coco-utils
+torch
+torchvision
+numpy
