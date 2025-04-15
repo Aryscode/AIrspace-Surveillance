@@ -9,10 +9,11 @@ CLASS_NAMES = ['bird', 'drone', 'aeroplane', 'chopper']
 CLASS_TO_IDX = {cls: i+1 for i, cls in enumerate(CLASS_NAMES)}
 
 class MatlabAnnotationDataset(Dataset):
-    def __init__(self, image_root, annotations_folder, index_csv, transforms=None):
+    def __init__(self, image_root, annotations_folder, index_csv, frame_step=1, transforms=None):
         self.image_root = image_root
         self.transforms = transforms
         self.samples = []
+        self.frame_step = frame_step
 
         self.index = pd.read_csv(index_csv)
 
@@ -23,8 +24,9 @@ class MatlabAnnotationDataset(Dataset):
             if os.path.exists(label_file):
                 df = pd.read_csv(label_file, header=None)
                 df.columns = ["timestamp", "aeroplane", "bird", "drone", "chopper"]
-                if frame_idx < len(df):
-                    self.samples.append((prefix, frame_idx, df.iloc[frame_idx]))
+                adjusted_frame_idx = frame_idx * self.frame_step
+                if adjusted_frame_idx < len(df):
+                    self.samples.append((prefix, adjusted_frame_idx, df.iloc[adjusted_frame_idx]))
 
     def __len__(self):
         return len(self.samples)

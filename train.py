@@ -22,7 +22,7 @@ def get_model(num_classes):
     return model
 
 def train_model(epochs=2, batch_size=4):
-    dataset = MatlabAnnotationDataset("images", "annotations", "train_index.csv", transforms=ToTensor())
+    dataset = MatlabAnnotationDataset("images", "annotations", "train_index.csv", frame_step=8, transforms=ToTensor())
 
     train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn, num_workers=4)
 
